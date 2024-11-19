@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 version: '3.9'
 
 services:
@@ -11,3 +12,18 @@ services:
       - .:/app  # Mount local directory to the container
     environment:
       - DEBUG=True  # Example of an environment variable
+=======
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"  # Map container port 8000 to host port 8000
+    volumes:
+      - .:/app  # Mount local directory to the container
+    environment:
+      - DEBUG=True  # Example of an environment variable
+>>>>>>> c3d906adf9a22d9e79e87824df9b9fb4eb51a036
