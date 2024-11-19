@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"  # Map container port 8000 to host port 8000
+    volumes:
+      - .:/app  # Mount local directory to the container
+    environment:
+      - DEBUG=True  # Example of an environment variable
