@@ -1,24 +1,26 @@
-# Use an official Python image from the Docker Hub
-FROM python:3.11-slim
+FROM python:3-alpine AS builder
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+WORKDIR /app
 
-# Set the working directory in the container
-WORKDIR /app/softwarebackend
+RUN python3 -m venv venv
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Copy the requirements file into the container
 COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-# Install the Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Stage 2
+FROM python:3-alpine AS runner
 
-# Copy the rest of the application code into the container
-COPY . .
+ENV VIRTUAL_ENV=/app/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV PORT=8000
 
-# Expose the port for Django (default is 8000)
-EXPOSE 8000
+WORKDIR /app
 
-# Command to run the Django development server (update with WSGI server in production)
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+COPY --from=builder /app/venv venv
+COPY example_django example_django
+
+EXPOSE ${PORT}
+
+CMD gunicorn --bind :${PORT} --workers 2 example_django.wsgi
