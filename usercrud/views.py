@@ -22,7 +22,7 @@ class UserProfileViewSet(ModelViewSet):
         """
         if self.action == 'create': 
             self.permission_classes = []
-        if self.action == 'destroy':  # DELETE
+        elif self.action == 'destroy':  # DELETE
             self.permission_classes = [IsOwnUser]
         else:
             self.permission_classes = [IsAuthenticated]

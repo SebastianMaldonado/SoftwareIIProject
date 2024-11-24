@@ -19,15 +19,29 @@ from django.urls import path
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 api_url_patterns = [
     path('', include('usercrud.urls'))
 ]
 
+schema_view = get_schema_view(
+    openapi.Info(
+        title="My API",
+        default_version='v1',
+        description="Test description",
+    ),
+    public=True,
+)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include(api_url_patterns))
+    path('auth/', include(api_url_patterns)),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 if settings.DEBUG:

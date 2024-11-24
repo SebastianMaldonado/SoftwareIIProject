@@ -16,7 +16,7 @@ class UserProfile(models.Model):
     
     gender = models.TextField(max_length=50)
     cel_num = models.CharField(max_length=20)
-    image = models.ImageField()
+    image = models.ImageField(null=True, blank=True)
 
     def __str__(self):
         return self.user.email

@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
     birth_date = serializers.DateField()
     gender = serializers.CharField(max_length=50)
     cel_num = serializers.CharField(max_length=20)
-    image = serializers.ImageField()
+    image = serializers.ImageField(required=False, allow_null=True)
     
     class Meta:
         model = UserProfile
@@ -39,7 +39,11 @@ class UserSerializer(serializers.ModelSerializer):
                 name_origin = self.get_origin_from_gemini(validated_data['first_name'])
                 user_profile_data = {key: validated_data[key] for key in ['doc_type', 'doc_num', 'first_name', 
                                                                         'second_name', 'last_name', 'birth_date', 
-                                                                        'gender', 'cel_num', 'image']}
+                                                                        'gender', 'cel_num']}
+                
+                if 'image' in validated_data:
+                    user_profile_data['image'] = validated_data['image']
+                    
                 user_profile_data['name_origin'] = name_origin
                 user_profile = UserProfile.objects.create(user=user, **user_profile_data)
                 
