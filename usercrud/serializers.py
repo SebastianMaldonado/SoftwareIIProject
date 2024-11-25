@@ -36,24 +36,55 @@ class UserSerializer(serializers.ModelSerializer):
                 }
                 user = User.objects.create_user(**user_data)
                 
-                name_origin = self.get_origin_from_gemini(validated_data['first_name'])
-                user_profile_data = {key: validated_data[key] for key in ['doc_type', 'doc_num', 'first_name', 
-                                                                        'second_name', 'last_name', 'birth_date', 
-                                                                        'gender', 'cel_num']}
-                
-                if 'image' in validated_data:
-                    user_profile_data['image'] = validated_data['image']
+                try:
+                    name_origin = self.get_origin_from_gemini(validated_data['first_name'])
+                    user_profile_data = {key: validated_data[key] for key in ['doc_type', 'doc_num', 'first_name', 
+                                                                            'second_name', 'last_name', 'birth_date', 
+                                                                            'gender', 'cel_num']}
                     
-                user_profile_data['name_origin'] = name_origin
-                user_profile = UserProfile.objects.create(user=user, **user_profile_data)
+                    if 'image' in validated_data:
+                        user_profile_data['image'] = validated_data['image']
+                        
+                    user_profile_data['name_origin'] = name_origin
+                    user_profile = UserProfile.objects.create(user=user, **user_profile_data)
+                    
+                    return user_profile
                 
-                return user_profile
+                except Exception as e:
+                    user.delete()
+                    raise e
+                
         except Exception as e:
-            user.delete()
             raise e
     
     def get_origin_from_gemini(self, name):
         return "Hebrew"
+    
+    def update(self, instance, validated_data):
+        # Update the associated user model fields (password, email)
+        user_data = validated_data.get('user', {})
+
+        if 'password' in user_data:
+            instance.user.set_password(user_data['password'])  # Set password properly
+        if 'email' in user_data:
+            instance.user.email = user_data['email']
+
+        # Now update UserProfile fields
+        instance.doc_type = validated_data.get('doc_type', instance.doc_type)
+        instance.doc_num = validated_data.get('doc_num', instance.doc_num)
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.second_name = validated_data.get('second_name', instance.second_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.birth_date = validated_data.get('birth_date', instance.birth_date)
+        instance.gender = validated_data.get('gender', instance.gender)
+        instance.cel_num = validated_data.get('cel_num', instance.cel_num)
+        instance.image = validated_data.get('image', instance.image)
+        
+        # Save the updated User and UserProfile instances
+        instance.user.save()
+        instance.save()
+
+        return instance
     
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
